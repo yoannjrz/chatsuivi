@@ -126,39 +126,13 @@ let cZone=null,cType='pipi',cTab='today',showModal=false,showSettings=false;
 let timeMode='exact',selectedSlot=null,cCry=undefined;
 let chartInst=null;
 
-function setDuration(d){
-const val = Math.max(30,Math.min(90,d));
-localStorage.setItem('suivi_duration', val);
-
-try{
-const { db, ref, set } = window.firebaseDB || {};
-if(db && ref && set){
-set(ref(db, 'settings/suivi_duration'), val);
-}
-}catch{}
-}
+function getDuration(){return parseInt(localStorage.getItem('suivi_duration')||'30');}
+function setDuration(d){localStorage.setItem('suivi_duration',Math.max(30,Math.min(90,d)));}
 
 function sk(d){return'catlog5_'+d;}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 function loadDay(d){try{return JSON.parse(localStorage.getItem(sk(d))||'{"medDone":false,"logs":[]}')}catch{return{medDone:false,logs:[]}}}
-function saveDay(d,data){
-try{
-localStorage.setItem(sk(d),JSON.stringify(data));
-}catch{}
-
-try{
-const { db, ref, set } = window.firebaseDB || {};
-if(db && ref && set){
-set(ref(db, 'days/' + d), data)
-.then(() => alert('Firebase OK : ' + d))
-.catch((e) => alert('Erreur Firebase : ' + e.message));
-} else {
-alert('FirebaseDB non chargé');
-}
-}catch(e){
-alert('Crash saveDay : ' + e.message);
-}
-}
+function saveDay(d,data){try{localStorage.setItem(sk(d),JSON.stringify(data))}catch{}}
 function nowTime(){return new Date().toTimeString().slice(0,5);}
 function daysElapsed(){return Math.min(Math.floor((new Date()-START)/86400000),getDuration());}
 function getDay(o){const d=new Date(START);d.setDate(START.getDate()+o);return d;}
@@ -617,6 +591,15 @@ const db = getDatabase(app);
 
 window.firebaseDB = { db, ref, set, get, onValue };
 </script>
- 
+
+  <script type="module">
+const { db, ref, set } = window.firebaseDB;
+
+await set(ref(db, "test"), {
+message: "Bonjour Firebase",
+heure: new Date().toISOString()
+});
+</script>
+  
 </body>
 </html>

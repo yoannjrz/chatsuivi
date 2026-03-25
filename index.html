@@ -591,15 +591,6 @@ const db = getDatabase(app);
 
 window.firebaseDB = { db, ref, set, get, onValue };
 </script>
-
-  <script type="module">
-const { db, ref, set } = window.firebaseDB;
-
-await set(ref(db, "test"), {
-message: "Bonjour Firebase",
-heure: new Date().toISOString()
-});
-</script>
-  
+ 
 </body>
 </html>

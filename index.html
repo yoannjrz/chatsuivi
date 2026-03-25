@@ -149,9 +149,15 @@ localStorage.setItem(sk(d),JSON.stringify(data));
 try{
 const { db, ref, set } = window.firebaseDB || {};
 if(db && ref && set){
-set(ref(db, 'days/' + d), data);
+set(ref(db, 'days/' + d), data)
+.then(() => alert('Firebase OK : ' + d))
+.catch((e) => alert('Erreur Firebase : ' + e.message));
+} else {
+alert('FirebaseDB non chargé');
 }
-}catch{}
+}catch(e){
+alert('Crash saveDay : ' + e.message);
+}
 }
 function nowTime(){return new Date().toTimeString().slice(0,5);}
 function daysElapsed(){return Math.min(Math.floor((new Date()-START)/86400000),getDuration());}

@@ -14,6 +14,7 @@
   --tab-bg:#ebebeb;--tab-active:#ffffff;
   --notif-bg:#FAEEDA;--notif-border:#FAC775;--notif-txt:#633806;
   --ok-bg:#E1F5EE;--ok-border:#1D9E75;--ok-txt:#0F6E56;
+  --danger-bg:#FCEBEB;--danger-border:#E24B4A;--danger-txt:#A32D2D;
   --overlay:rgba(0,0,0,0.5);--modal-bg:#ffffff;
 }
 @media (prefers-color-scheme:dark){
@@ -23,6 +24,7 @@
     --tab-bg:#1c1c1e;--tab-active:#3a3a3c;
     --notif-bg:#3a2800;--notif-border:#7a5200;--notif-txt:#FAC775;
     --ok-bg:#0d2b1f;--ok-border:#1D9E75;--ok-txt:#5DCAA5;
+    --danger-bg:#2d0a0a;--danger-border:#E24B4A;--danger-txt:#ff8080;
     --overlay:rgba(0,0,0,0.7);--modal-bg:#1c1c1e;
   }
 }
@@ -58,13 +60,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pb{height:100%;border-radius:3px;background:#1D9E75;}
 .notif{background:var(--notif-bg);border:0.5px solid var(--notif-border);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--notif-txt);margin-bottom:1rem;}
 .good-banner{background:var(--ok-bg);border:0.5px solid var(--ok-border);border-radius:8px;padding:9px 13px;font-size:13px;color:var(--ok-txt);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.ll{max-height:240px;overflow-y:auto;}
+.ll{max-height:260px;overflow-y:auto;}
 .li{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
 .li:last-child{border-bottom:none;}
 .ld{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .dp{background:#378ADD;}.dm{background:#EF9F27;}
-.lx{margin-left:auto;cursor:pointer;color:var(--txt3);font-size:17px;line-height:1;flex-shrink:0;}
-.dh{font-size:12px;font-weight:500;color:var(--txt2);padding:7px 0 3px;border-bottom:0.5px solid var(--border2);display:flex;justify-content:space-between;margin-top:4px;}
+.lactions{display:flex;gap:4px;margin-left:auto;flex-shrink:0;}
+.lbtn{cursor:pointer;color:var(--txt3);font-size:13px;padding:2px 5px;border-radius:4px;border:0.5px solid var(--border);background:var(--bg3);}
+.lbtn.del{color:var(--danger-txt);border-color:var(--danger-border);}
+.dh{font-size:12px;font-weight:500;color:var(--txt2);padding:7px 0 3px;border-bottom:0.5px solid var(--border2);display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.dh-del{font-size:11px;color:var(--danger-txt);cursor:pointer;padding:2px 7px;border-radius:4px;border:0.5px solid var(--danger-border);background:var(--danger-bg);}
 .de{font-size:12px;color:var(--txt3);padding:4px 0 5px 14px;border-bottom:0.5px solid var(--border);}
 .overlay{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;}
 .modal{background:var(--modal-bg);border-radius:16px;padding:1.25rem;width:100%;max-width:340px;max-height:90vh;overflow-y:auto;border:0.5px solid var(--border);}
@@ -77,7 +82,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .time-mode-toggle{display:flex;gap:6px;margin-bottom:10px;}
 .tm-btn{flex:1;padding:7px 4px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:12px;color:var(--txt2);text-align:center;}
 .tm-btn.active{background:#E6F1FB;border-color:#378ADD;color:#185FA5;font-weight:500;}
-input[type=time],input[type=number]{width:100%;padding:7px 9px;border-radius:8px;border:0.5px solid var(--border);background:var(--input-bg);color:var(--txt);font-size:15px;font-family:inherit;margin-bottom:4px;}
+input[type=time]{width:100%;padding:7px 9px;border-radius:8px;border:0.5px solid var(--border);background:var(--input-bg);color:var(--txt);font-size:15px;font-family:inherit;margin-bottom:4px;}
 .slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
 .slot-btn{padding:8px 6px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg3);cursor:pointer;text-align:center;font-size:12px;color:var(--txt);}
 .slot-btn.active{background:#E6F1FB;border-color:#378ADD;color:#0C447C;font-weight:500;}
@@ -93,6 +98,7 @@ input[type=time],input[type=number]{width:100%;padding:7px 9px;border-radius:8px
 .mact{display:flex;gap:8px;margin-top:14px;}
 .btn{flex:1;padding:11px;border-radius:8px;border:0.5px solid var(--border);cursor:pointer;font-size:14px;font-weight:500;background:var(--bg3);color:var(--txt);}
 .btn-ok{background:#1D9E75;border-color:#1D9E75;color:white;}
+.btn-danger{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger-txt);}
 .bar-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border);}
 .bar-row:last-child{border-bottom:none;}
 .bar-lbl{width:110px;font-size:12px;color:var(--txt2);flex-shrink:0;}
@@ -102,8 +108,6 @@ input[type=time],input[type=number]{width:100%;padding:7px 9px;border-radius:8px
 .expbtn{width:100%;padding:12px;border-radius:8px;border:0.5px solid #185FA5;background:#E6F1FB;color:#185FA5;cursor:pointer;font-size:14px;font-weight:500;margin-top:4px;}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
 .settings-row:last-child{border-bottom:none;}
-.settings-label{font-size:14px;color:var(--txt);}
-.settings-sub{font-size:12px;color:var(--txt2);margin-top:2px;}
 .dur-ctrl{display:flex;align-items:center;gap:10px;}
 .dur-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border);background:var(--bg3);cursor:pointer;font-size:18px;color:var(--txt);display:flex;align-items:center;justify-content:center;}
 .dur-val{font-size:16px;font-weight:500;color:var(--txt);min-width:32px;text-align:center;}
@@ -124,11 +128,12 @@ const SLOTS=[
 const START=new Date('2026-03-25');
 let cZone=null,cType='pipi',cTab='today',showModal=false,showSettings=false;
 let timeMode='exact',selectedSlot=null,cCry=undefined;
+let editTs=null,editDateKey=null;
+let confirmDeleteDay=null;
 let chartInst=null;
 
 function getDuration(){return parseInt(localStorage.getItem('suivi_duration')||'30');}
 function setDuration(d){localStorage.setItem('suivi_duration',Math.max(30,Math.min(90,d)));}
-
 function sk(d){return'catlog5_'+d;}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 function loadDay(d){try{return JSON.parse(localStorage.getItem(sk(d))||'{"medDone":false,"logs":[]}')}catch{return{medDone:false,logs:[]}}}
@@ -139,16 +144,15 @@ function getDay(o){const d=new Date(START);d.setDate(START.getDate()+o);return d
 function dateKey(o){return getDay(o).toISOString().slice(0,10);}
 function dateLabel(o){return getDay(o).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});}
 function isDark(){return window.matchMedia('(prefers-color-scheme:dark)').matches;}
+function getDur(){return getDuration();}
 
 function allDays(){
-  const dur=getduration();
+  const dur=getDur();
   return Array.from({length:dur},(_,i)=>{
     const k=dateKey(i);const data=loadDay(k);
     return{offset:i,key:k,label:dateLabel(i),logs:data.logs,medDone:data.medDone};
   });
 }
-function getduration(){return getDuration();}
-
 function timeDisplay(log){
   if(log.slot){const s=SLOTS.find(s=>s.id===log.slot);return s?s.label:'?';}
   return log.time||'?';
@@ -192,6 +196,11 @@ function markNoAccident(){
   const k=todayKey();const data=loadDay(k);
   data.noAccident=true;saveDay(k,data);renderApp();
 }
+function undoClean(){
+  const k=todayKey();const data=loadDay(k);
+  data.noAccident=false;saveDay(k,data);renderApp();
+}
+
 function setType(t){
   cType=t;
   const bp=document.getElementById('tbtn-pipi');const bm=document.getElementById('tbtn-marq');
@@ -220,30 +229,80 @@ function setCry(v){
   if(cn)cn.className='cry-btn'+(v===false?' active-no':'');
   if(cns)cns.className='cry-btn'+(v===null?' active-no':'');
 }
+
 function openModal(zoneId){
-  cZone=zoneId;cType='pipi';timeMode='exact';selectedSlot=null;cCry=undefined;showModal=true;
+  cZone=zoneId;cType='pipi';timeMode='exact';selectedSlot=null;cCry=undefined;
+  editTs=null;editDateKey=null;showModal=true;
   renderApp();
   setTimeout(()=>{
     const mt=document.getElementById('mtime');if(mt)mt.value=nowTime();
     setType('pipi');setTimeMode('exact');
   },10);
 }
-function closeModal(){showModal=false;renderApp();}
+
+function openEditModal(ts,dk){
+  const data=loadDay(dk);
+  const log=data.logs.find(l=>l.ts===ts);
+  if(!log)return;
+  editTs=ts;editDateKey=dk;
+  cZone=log.zone;cType=log.type;cCry=log.cry;
+  timeMode=log.slot?'slot':'exact';
+  selectedSlot=log.slot||null;
+  showModal=true;
+  renderApp();
+  setTimeout(()=>{
+    const mt=document.getElementById('mtime');
+    if(mt&&log.time)mt.value=log.time;
+    setType(log.type);
+    setCry(log.cry===undefined?undefined:log.cry);
+    setTimeMode(timeMode);
+    if(log.slot){
+      setTimeout(()=>selectSlot(log.slot),10);
+    }
+  },10);
+}
+
+function closeModal(){showModal=false;editTs=null;editDateKey=null;renderApp();}
+
 function confirmAccident(){
-  const k=todayKey();const data=loadDay(k);
-  data.noAccident=false;
-  let entry={zone:cZone,type:cType,ts:Date.now(),cry:cCry};
-  if(timeMode==='exact'){const mt=document.getElementById('mtime');entry.time=mt?mt.value:nowTime();}
-  else{if(!selectedSlot)return;entry.slot=selectedSlot;}
-  data.logs.push(entry);
+  const dk=editDateKey||todayKey();
+  const data=loadDay(dk);
+  if(editTs){
+    const idx=data.logs.findIndex(l=>l.ts===editTs);
+    if(idx===-1){closeModal();return;}
+    let entry=data.logs[idx];
+    entry.zone=cZone;entry.type=cType;entry.cry=cCry;
+    delete entry.time;delete entry.slot;
+    if(timeMode==='exact'){const mt=document.getElementById('mtime');entry.time=mt?mt.value:nowTime();}
+    else{if(!selectedSlot){return;}entry.slot=selectedSlot;}
+    data.logs[idx]=entry;
+  } else {
+    data.noAccident=false;
+    let entry={zone:cZone,type:cType,ts:Date.now(),cry:cCry};
+    if(timeMode==='exact'){const mt=document.getElementById('mtime');entry.time=mt?mt.value:nowTime();}
+    else{if(!selectedSlot)return;entry.slot=selectedSlot;}
+    data.logs.push(entry);
+  }
   data.logs.sort((a,b)=>timeSortKey(a).localeCompare(timeSortKey(b)));
-  saveDay(k,data);showModal=false;renderApp();
+  saveDay(dk,data);showModal=false;editTs=null;editDateKey=null;renderApp();
 }
-function deleteLog(ts){
-  const k=todayKey();const data=loadDay(k);
+
+function deleteLog(ts,dk){
+  const data=loadDay(dk);
   data.logs=data.logs.filter(l=>l.ts!==ts);
-  saveDay(k,data);renderApp();
+  saveDay(dk,data);renderApp();
 }
+
+function askDeleteDay(dk){
+  confirmDeleteDay=dk;renderApp();
+}
+function cancelDeleteDay(){confirmDeleteDay=null;renderApp();}
+function doDeleteDay(){
+  if(!confirmDeleteDay)return;
+  saveDay(confirmDeleteDay,{medDone:false,logs:[],noAccident:false});
+  confirmDeleteDay=null;renderApp();
+}
+
 function toggleMed(){
   const k=todayKey();const data=loadDay(k);
   data.medDone=!data.medDone;saveDay(k,data);renderApp();
@@ -253,6 +312,7 @@ function changeDuration(delta){
 }
 function switchTab(t){cTab=t;showSettings=false;renderApp();}
 function toggleSettings(){showSettings=!showSettings;renderApp();}
+
 function updateClock(){
   const now=new Date();
   const el=document.getElementById('ck');const de=document.getElementById('dt');
@@ -293,7 +353,7 @@ function calColors(cnt,isFuture){
   return isDark()?{bg:'#5a0000',color:'#ff8080'}:{bg:'#E24B4A',color:'white'};
 }
 function renderCalendar(){
-  const elapsed=daysElapsed();const dur=getduration();
+  const elapsed=daysElapsed();const dur=getDur();
   let html='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;">';
   for(let i=0;i<dur;i++){
     const d=loadDay(dateKey(i));const cnt=d.logs.length;const isFuture=i>elapsed;
@@ -312,8 +372,15 @@ function renderCalendar(){
   return html+'</div>';
 }
 
+function logActions(l,dk){
+  return`<div class="lactions">
+    <span class="lbtn" onclick="openEditModal(${l.ts},'${dk}')">Modifier</span>
+    <span class="lbtn del" onclick="deleteLog(${l.ts},'${dk}')">Suppr.</span>
+  </div>`;
+}
+
 function renderApp(){
-  const dur=getduration();
+  const dur=getDur();
   const elapsed=daysElapsed(),daysLeft=Math.max(0,dur-elapsed);
   const k=todayKey(),todayData=loadDay(k);
   const scoreData=computeScore(),streak=consecutiveZeros();
@@ -321,7 +388,7 @@ function renderApp(){
   const totalAll=allLogsFlat.length,totalMarq=allLogsFlat.filter(l=>l.type==='marquage').length;
   const totalCry=allLogsFlat.filter(l=>l.cry===true).length;
   const zeroDays=allDays().slice(0,Math.max(elapsed,1)).filter(d=>d.logs.length===0).length;
-  const todayConfirmedClean=todayData.noAccident===true && todayData.logs.length===0;
+  const todayConfirmedClean=todayData.noAccident===true&&todayData.logs.length===0;
 
   let html=`<div class="hdr">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
@@ -337,8 +404,8 @@ function renderApp(){
       <div class="ctitle">Paramètres</div>
       <div class="settings-row">
         <div>
-          <div class="settings-label">Durée du suivi</div>
-          <div class="settings-sub">Le véto peut prolonger au-delà de 30 jours</div>
+          <div style="font-size:14px;color:var(--txt)">Durée du suivi</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:2px">Le véto peut prolonger au-delà de 30 jours</div>
         </div>
         <div class="dur-ctrl">
           <button class="dur-btn" onclick="changeDuration(-5)">−</button>
@@ -352,6 +419,18 @@ function renderApp(){
     </div>`;
   }
 
+  if(confirmDeleteDay){
+    const dayData=loadDay(confirmDeleteDay);
+    html+=`<div class="overlay" onclick="cancelDeleteDay()"><div class="modal" onclick="event.stopPropagation()">
+      <h3>Supprimer cette journée ?</h3>
+      <p style="font-size:14px;color:var(--txt2);margin-bottom:16px;">Tous les accidents de cette journée seront supprimés. Cette action est irréversible.</p>
+      <div class="mact">
+        <button class="btn" onclick="cancelDeleteDay()">Annuler</button>
+        <button class="btn btn-danger" onclick="doDeleteDay()">Supprimer</button>
+      </div>
+    </div></div>`;
+  }
+
   html+=`<div class="tabs">
     <div class="tab ${cTab==='today'?'active':''}" onclick="switchTab('today')">Aujourd'hui</div>
     <div class="tab ${cTab==='progress'?'active':''}" onclick="switchTab('progress')">Progression</div>
@@ -361,50 +440,49 @@ function renderApp(){
 
   if(showModal){
     const z=ZONES.find(z=>z.id===cZone);
+    const isEdit=editTs!==null;
     html+=`<div class="overlay" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()">
-      <h3>${z?z.label:''}</h3>
+      <h3>${isEdit?'Modifier':'Enregistrer'} — ${z?z.label:''}</h3>
       <div class="fl">Type d'accident</div>
       <div class="ttgl">
-        <div class="tbtn active" id="tbtn-pipi" onclick="setType('pipi')">Pipi normal</div>
-        <div class="tbtn" id="tbtn-marq" onclick="setType('marquage')">Marquage</div>
+        <div class="tbtn ${cType==='pipi'?'active':''}" id="tbtn-pipi" onclick="setType('pipi')">Pipi normal</div>
+        <div class="tbtn ${cType==='marquage'?'active':''}" id="tbtn-marq" onclick="setType('marquage')">Marquage</div>
       </div>
-      <div class="qh" id="qhint">Grande quantité</div>
+      <div class="qh" id="qhint">${cType==='marquage'?'Petite quantité (marquage)':'Grande quantité'}</div>
       <div class="fl">A-t-il pleuré avant ?</div>
       <div class="cry-row">
-        <div class="cry-btn" id="cry-yes" onclick="setCry(true)">Oui</div>
-        <div class="cry-btn" id="cry-no" onclick="setCry(false)">Non</div>
-        <div class="cry-btn" id="cry-nsp" onclick="setCry(null)">Je sais pas</div>
+        <div class="cry-btn ${cCry===true?'active-yes':''}" id="cry-yes" onclick="setCry(true)">Oui</div>
+        <div class="cry-btn ${cCry===false?'active-no':''}" id="cry-no" onclick="setCry(false)">Non</div>
+        <div class="cry-btn ${cCry===null?'active-no':''}" id="cry-nsp" onclick="setCry(null)">Je sais pas</div>
       </div>
       <div style="font-size:11px;color:var(--txt3);margin-bottom:10px;">Important pour le vétérinaire</div>
       <div class="fl">Quand ?</div>
       <div class="time-mode-toggle">
-        <div class="tm-btn active" id="tm-exact" onclick="setTimeMode('exact')">Heure précise</div>
-        <div class="tm-btn" id="tm-slot" onclick="setTimeMode('slot')">Créneau</div>
+        <div class="tm-btn ${timeMode==='exact'?'active':''}" id="tm-exact" onclick="setTimeMode('exact')">Heure précise</div>
+        <div class="tm-btn ${timeMode==='slot'?'active':''}" id="tm-slot" onclick="setTimeMode('slot')">Créneau</div>
       </div>
-      <div id="exact-panel">
+      <div id="exact-panel" style="display:${timeMode==='exact'?'block':'none'}">
         <input type="time" id="mtime"/>
         <div style="font-size:11px;color:var(--txt3);margin-top:3px;margin-bottom:2px;">Modifiez si vous enregistrez après coup</div>
       </div>
-      <div id="slot-panel" style="display:none;">
+      <div id="slot-panel" style="display:${timeMode==='slot'?'block':'none'}">
         <div class="slot-grid">`;
-    SLOTS.forEach(s=>{html+=`<div class="slot-btn" data-slot="${s.id}" onclick="selectSlot('${s.id}')"><div>${s.label}</div><div class="slot-sub">${s.sub}</div></div>`;});
+    SLOTS.forEach(s=>{html+=`<div class="slot-btn ${selectedSlot===s.id?'active':''}" data-slot="${s.id}" onclick="selectSlot('${s.id}')"><div>${s.label}</div><div class="slot-sub">${s.sub}</div></div>`;});
     html+=`</div></div>
       <div class="mact">
         <button class="btn" onclick="closeModal()">Annuler</button>
-        <button class="btn btn-ok" onclick="confirmAccident()">Enregistrer</button>
+        <button class="btn btn-ok" onclick="confirmAccident()">${isEdit?'Enregistrer les modifications':'Enregistrer'}</button>
       </div>
     </div></div>`;
   }
 
   if(cTab==='today'){
     if(!todayData.medDone)html+=`<div class="notif">Médicament non encore donné aujourd'hui</div>`;
-
     if(todayConfirmedClean){
       html+=`<div class="good-banner"><span>Bonne journée — aucun accident confirmé</span><button style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--txt3)" onclick="undoClean()">Annuler</button></div>`;
     } else if(todayData.logs.length===0){
       html+=`<button onclick="markNoAccident()" style="width:100%;padding:13px;border-radius:10px;border:0.5px solid var(--ok-border);background:var(--ok-bg);color:var(--ok-txt);cursor:pointer;font-size:14px;font-weight:500;margin-bottom:1rem;">Aucun accident aujourd'hui</button>`;
     }
-
     html+=`<div class="card">
       <div class="ctitle">Médicament quotidien</div>
       <div class="med-row"><span style="font-size:14px;color:var(--txt)">Traitement donné aujourd'hui</span>
@@ -428,7 +506,7 @@ function renderApp(){
         <span style="font-weight:500;min-width:76px;color:var(--txt)">${timeDisplay(l)}</span>
         <span style="flex:1;font-size:12px;color:var(--txt)">${z?z.label:l.zone}</span>
         ${cryLabel(l)}
-        <span class="lx" onclick="deleteLog(${l.ts})">×</span>
+        ${logActions(l,k)}
       </div>`;
     });
     html+=`</div></div>`;
@@ -477,21 +555,30 @@ function renderApp(){
     html+=`<div class="card"><div class="ctitle">Journal complet — ${dur} jours</div><div class="ll">`;
     allDays().forEach((day,i)=>{
       const isFuture=i>elapsed;
-      const isToday=i===elapsed;
+      const isToday=dateKey(i)===todayKey();
       const badge=isToday?`<span style="font-size:10px;background:#1a3060;color:#7ab3f5;border-radius:3px;padding:1px 5px;margin-left:4px">aujourd'hui</span>`:'';
       const dayData=loadDay(day.key);
-      html+=`<div class="dh"><span>J${i+1} — ${day.label}${badge}</span><span style="font-weight:400">${isFuture?'—':day.logs.length+' acc.'}</span></div>`;
+      const hasLogs=day.logs.length>0;
+      html+=`<div class="dh">
+        <span>J${i+1} — ${day.label}${badge}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-weight:400;color:var(--txt2)">${isFuture?'—':day.logs.length+' acc.'}</span>
+          ${!isFuture&&hasLogs?`<span class="dh-del" onclick="askDeleteDay('${day.key}')">Tout suppr.</span>`:''}
+        </div>
+      </div>`;
       if(isFuture)html+=`<div class="de" style="font-style:italic">Pas encore atteint</div>`;
       else if(!day.logs.length){
-        const clean=dayData.noAccident===true?'Journée propre confirmée':'Aucun accident';
-        html+=`<div class="de" style="${dayData.noAccident?'color:var(--ok-txt)':''}">${clean}</div>`;
+        html+=`<div class="de" style="${dayData.noAccident?'color:var(--ok-txt)':''}">${dayData.noAccident?'Journée propre confirmée':'Aucun accident'}</div>`;
       }
       else day.logs.forEach(l=>{
         const z=ZONES.find(z=>z.id===l.zone);
-        html+=`<div class="li" style="padding-left:10px"><div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
+        html+=`<div class="li" style="padding-left:6px">
+          <div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
           <span style="font-weight:500;min-width:76px;color:var(--txt)">${timeDisplay(l)}</span>
           <span style="flex:1;font-size:12px;color:var(--txt)">${z?z.label:l.zone}</span>
-          ${cryLabel(l)}</div>`;
+          ${cryLabel(l)}
+          ${logActions(l,day.key)}
+        </div>`;
       });
     });
     html+=`</div></div>`;
@@ -516,9 +603,7 @@ function renderApp(){
       const dayData=loadDay(day.key);
       html+=`<div class="dh"><span>J${i+1} — ${day.label}</span><span style="font-weight:400">${isFuture?'—':day.logs.length+' acc.'}</span></div>`;
       if(isFuture)html+=`<div class="de" style="font-style:italic">—</div>`;
-      else if(!day.logs.length){
-        html+=`<div class="de" style="${dayData.noAccident?'color:var(--ok-txt)':''}">${dayData.noAccident?'Journée propre confirmée':'Aucun accident'}</div>`;
-      }
+      else if(!day.logs.length)html+=`<div class="de" style="${dayData.noAccident?'color:var(--ok-txt)':''}">${dayData.noAccident?'Journée propre confirmée':'Aucun accident'}</div>`;
       else day.logs.forEach(l=>{
         const z=ZONES.find(z=>z.id===l.zone);
         html+=`<div class="li" style="padding-left:10px"><div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
@@ -527,8 +612,7 @@ function renderApp(){
           ${cryLabel(l)}</div>`;
       });
     });
-    html+=`</div></div>
-    <button class="expbtn" onclick="exportText()">Copier le rapport texte</button>`;
+    html+=`</div></div><button class="expbtn" onclick="exportText()">Copier le rapport texte</button>`;
   }
 
   document.getElementById('app').innerHTML=html;
@@ -536,13 +620,8 @@ function renderApp(){
   if(cTab==='progress')requestAnimationFrame(()=>{renderChart();});
 }
 
-function undoClean(){
-  const k=todayKey();const data=loadDay(k);
-  data.noAccident=false;saveDay(k,data);renderApp();
-}
-
 function exportText(){
-  const dur=getduration();
+  const dur=getDur();
   const allLogsFlat=allDays().flatMap(d=>d.logs);
   const zoneTotals={};ZONES.forEach(z=>zoneTotals[z.id]=0);
   allLogsFlat.forEach(l=>{if(zoneTotals[l.zone]!==undefined)zoneTotals[l.zone]++;});
@@ -571,35 +650,5 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
 renderApp();
 setInterval(updateClock,1000);
 </script>
-
-  <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-apiKey: "AIzaSyAiXxJwRL5TkPrQEvb-GydCMqkehCjZQ-U",
-authDomain: "simba-adf7b.firebaseapp.com",
-databaseURL: "https://simba-adf7b-default-rtdb.europe-west1.firebasedatabase.app",
-projectId: "simba-adf7b",
-storageBucket: "simba-adf7b.firebasestorage.app",
-messagingSenderId: "1037970884641",
-appId: "1:1037970884641:web:1a3a00b2e834f61077fb60"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.firebaseDB = { db, ref, set, get, onValue };
-</script>
-
-  <script type="module">
-const { db, ref, set } = window.firebaseDB;
-
-await set(ref(db, "test"), {
-message: "Bonjour Firebase",
-heure: new Date().toISOString()
-});
-</script>
-  
 </body>
 </html>

@@ -650,5 +650,35 @@ window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{
 renderApp();
 setInterval(updateClock,1000);
 </script>
+
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAiXxJwRL5TkPrQEvb-GydCHqkehCjZQ-U",
+authDomain: "simba-adf7b.firebaseapp.com",
+databaseURL: "https://simba-adf7b-default-rtdb.europe-west1.firebasedatabase.app",
+projectId: "simba-adf7b",
+storageBucket: "simba-adf7b.firebasestorage.app",
+messagingSenderId: "1037970884641",
+appId: "1:1037970884641:web:1a3a00b2e834f61077fb60"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.firebaseDB = { db, ref, set, get, onValue };
+</script>
+
+<script type="module">
+const { db, ref, set } = window.firebaseDB;
+
+await set(ref(db, "test"), {
+message: "Bonjour Firebase",
+heure: new Date().toISOString()
+});
+</script>
+  
 </body>
 </html>

@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-</style>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Suivi Chat"/>
@@ -119,19 +118,23 @@ input[type=time]{width:100%;padding:7px 9px;border-radius:8px;border:0.5px solid
 <div class="app" id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+// MODIFICATION 1 : "Nuit X→Y" supprimé des slots
 const ZONES=[{id:'toilettes_bas',label:'Toilettes du bas'},{id:'salle_bain',label:'Salle de bain'},{id:'porte_toilettes',label:'Porte toilettes'},{id:'porte_entree',label:"Porte d'entrée"}];
 const SLOTS=[
   {id:'nuit',label:'Nuit',sub:'00h–06h',sort:'03:00'},
   {id:'matin',label:'Matin',sub:'06h–12h',sort:'09:00'},
   {id:'aprem',label:'Après-midi',sub:'12h–18h',sort:'15:00'},
   {id:'soiree',label:'Soirée',sub:'18h–00h',sort:'21:00'},
-  {id:'nuit_xy',label:'Nuit X→Y',sub:'Entre 2 jours',sort:'02:00'},
 ];
 const START=new Date('2026-03-25');
 let cZone=null,cType='pipi',cTab='today',showModal=false,showSettings=false;
 let timeMode='exact',selectedSlot=null,cCry=undefined;
 let editTs=null,editDateKey=null;
 let confirmDeleteDay=null;
+// MODIFICATION 2 : état pour confirmation suppression d'un log individuel
+let confirmDeleteLog=null; // {ts, dk}
+let detailLog=null; // {ts, dk} — modal détail d'un log
+let lastAdded=null; // {ts, dk} — récap après ajout
 let chartInst=null;
 
 function getDuration(){return parseInt(localStorage.getItem('suivi_duration')||'30');}
@@ -286,13 +289,28 @@ function confirmAccident(){
     data.logs.push(entry);
   }
   data.logs.sort((a,b)=>timeSortKey(a).localeCompare(timeSortKey(b)));
-  saveDay(dk,data);showModal=false;editTs=null;editDateKey=null;renderApp();
+  saveDay(dk,data);
+  if(!editTs){lastAdded={ts:entry.ts,dk};showModal=false;editTs=null;editDateKey=null;renderApp();}
+  else{showModal=false;editTs=null;editDateKey=null;renderApp();}
 }
 
+// MODIFICATION 2 : suppression avec confirmation
 function deleteLog(ts,dk){
+  confirmDeleteLog={ts,dk};
+  renderApp();
+}
+function cancelDeleteLog(){
+  confirmDeleteLog=null;
+  renderApp();
+}
+function doDeleteLog(){
+  if(!confirmDeleteLog)return;
+  const {ts,dk}=confirmDeleteLog;
   const data=loadDay(dk);
   data.logs=data.logs.filter(l=>l.ts!==ts);
-  saveDay(dk,data);renderApp();
+  saveDay(dk,data);
+  confirmDeleteLog=null;
+  renderApp();
 }
 
 function askDeleteDay(dk){
@@ -374,10 +392,20 @@ function renderCalendar(){
   return html+'</div>';
 }
 
-function logActions(l,dk){
-  return`<div class="lactions">
-    <span class="lbtn" onclick="openEditModal(${l.ts},'${dk}')">Modifier</span>
-    <span class="lbtn del" onclick="deleteLog(${l.ts},'${dk}')">Suppr.</span>
+function openDetailModal(ts,dk){
+  detailLog={ts,dk};renderApp();
+}
+function closeDetailModal(){
+  detailLog=null;renderApp();
+}
+function logRow(l,dk){
+  const z=ZONES.find(z=>z.id===l.zone);
+  return`<div class="li" style="cursor:pointer;" onclick="openDetailModal(${l.ts},'${dk}')">
+    <div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
+    <span style="font-weight:500;min-width:76px;color:var(--txt)">${timeDisplay(l)}</span>
+    <span style="flex:1;font-size:12px;color:var(--txt)">${z?z.label:l.zone}</span>
+    ${cryLabel(l)}
+    <span style="font-size:11px;color:var(--txt3);flex-shrink:0;">›</span>
   </div>`;
 }
 
@@ -421,8 +449,19 @@ function renderApp(){
     </div>`;
   }
 
+  // MODIFICATION 2 : modal de confirmation suppression log individuel
+  if(confirmDeleteLog){
+    html+=`<div class="overlay" onclick="cancelDeleteLog()"><div class="modal" onclick="event.stopPropagation()">
+      <h3>Supprimer cet accident ?</h3>
+      <p style="font-size:14px;color:var(--txt2);margin-bottom:16px;">Cette action est irréversible.</p>
+      <div class="mact">
+        <button class="btn" onclick="cancelDeleteLog()">Annuler</button>
+        <button class="btn btn-danger" onclick="doDeleteLog()">Supprimer</button>
+      </div>
+    </div></div>`;
+  }
+
   if(confirmDeleteDay){
-    const dayData=loadDay(confirmDeleteDay);
     html+=`<div class="overlay" onclick="cancelDeleteDay()"><div class="modal" onclick="event.stopPropagation()">
       <h3>Supprimer cette journée ?</h3>
       <p style="font-size:14px;color:var(--txt2);margin-bottom:16px;">Tous les accidents de cette journée seront supprimés. Cette action est irréversible.</p>
@@ -431,6 +470,53 @@ function renderApp(){
         <button class="btn btn-danger" onclick="doDeleteDay()">Supprimer</button>
       </div>
     </div></div>`;
+  }
+
+  // Modal détail d'un log
+  if(detailLog){
+    const dlData=loadDay(detailLog.dk);
+    const dl=dlData.logs.find(l=>l.ts===detailLog.ts);
+    if(dl){
+      const dlz=ZONES.find(z=>z.id===dl.zone);
+      const cryTxt=dl.cry===true?'Oui — a pleuré':dl.cry===false?'Non — sans pleurs':'Non renseigné';
+      html+=`<div class="overlay" onclick="closeDetailModal()"><div class="modal" onclick="event.stopPropagation()">
+        <h3>Détail de l'accident</h3>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Heure</span><span style="font-weight:500;color:var(--txt)">${timeDisplay(dl)}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Endroit</span><span style="font-weight:500;color:var(--txt)">${dlz?dlz.label:dl.zone}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Type</span><span style="font-weight:500;color:var(--txt)">${dl.type==='marquage'?'Marquage':'Pipi normal'}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Pleurs</span><span style="font-weight:500;color:var(--txt)">${cryTxt}</span></div>
+        </div>
+        <div class="mact">
+          <button class="btn btn-danger" onclick="closeDetailModal();deleteLog(${dl.ts},'${detailLog.dk}')">Supprimer</button>
+          <button class="btn btn-ok" onclick="closeDetailModal();openEditModal(${dl.ts},'${detailLog.dk}')">Modifier</button>
+        </div>
+        <button class="btn" style="margin-top:8px;width:100%;" onclick="closeDetailModal()">Fermer</button>
+      </div></div>`;
+    }
+  }
+
+  // Modal récap après ajout
+  if(lastAdded){
+    const laData=loadDay(lastAdded.dk);
+    const la=laData.logs.find(l=>l.ts===lastAdded.ts);
+    if(la){
+      const laz=ZONES.find(z=>z.id===la.zone);
+      const cryTxt=la.cry===true?'A pleuré avant':la.cry===false?'Sans pleurs':'Non renseigné';
+      html+=`<div class="overlay" onclick="lastAdded=null;renderApp()"><div class="modal" onclick="event.stopPropagation()">
+        <h3>✓ Accident enregistré</h3>
+        <div style="background:var(--bg3);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Heure</span><span style="font-weight:500;color:var(--txt)">${timeDisplay(la)}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Endroit</span><span style="font-weight:500;color:var(--txt)">${laz?laz.label:la.zone}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Type</span><span style="font-weight:500;color:var(--txt)">${la.type==='marquage'?'Marquage':'Pipi normal'}</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--txt2)">Pleurs</span><span style="font-weight:500;color:var(--txt)">${la.cry===true?'Oui':la.cry===false?'Non':'Non renseigné'}</span></div>
+        </div>
+        <div class="mact">
+          <button class="btn" onclick="openEditModal(${la.ts},'${lastAdded.dk}');lastAdded=null;">Modifier</button>
+          <button class="btn btn-ok" onclick="lastAdded=null;renderApp()">OK</button>
+        </div>
+      </div></div>`;
+    }
   }
 
   html+=`<div class="tabs">
@@ -502,15 +588,7 @@ function renderApp(){
       <div class="ctitle">Journal du jour (${todayData.logs.length} accident${todayData.logs.length>1?'s':''})</div>
       <div class="ll">`;
     if(!todayData.logs.length)html+=`<div style="text-align:center;padding:1.2rem 0;font-size:13px;color:var(--txt3);">${todayConfirmedClean?'Journée propre confirmée':'Aucun accident enregistré'}</div>`;
-    else todayData.logs.forEach(l=>{
-      const z=ZONES.find(z=>z.id===l.zone);
-      html+=`<div class="li"><div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
-        <span style="font-weight:500;min-width:76px;color:var(--txt)">${timeDisplay(l)}</span>
-        <span style="flex:1;font-size:12px;color:var(--txt)">${z?z.label:l.zone}</span>
-        ${cryLabel(l)}
-        ${logActions(l,k)}
-      </div>`;
-    });
+    else todayData.logs.forEach(l=>{html+=logRow(l,k);});
     html+=`</div></div>`;
 
   } else if(cTab==='progress'){
@@ -572,16 +650,7 @@ function renderApp(){
       else if(!day.logs.length){
         html+=`<div class="de" style="${dayData.noAccident?'color:var(--ok-txt)':''}">${dayData.noAccident?'Journée propre confirmée':'Aucun accident'}</div>`;
       }
-      else day.logs.forEach(l=>{
-        const z=ZONES.find(z=>z.id===l.zone);
-        html+=`<div class="li" style="padding-left:6px">
-          <div class="ld ${l.type==='marquage'?'dm':'dp'}"></div>
-          <span style="font-weight:500;min-width:76px;color:var(--txt)">${timeDisplay(l)}</span>
-          <span style="flex:1;font-size:12px;color:var(--txt)">${z?z.label:l.zone}</span>
-          ${cryLabel(l)}
-          ${logActions(l,day.key)}
-        </div>`;
-      });
+      else day.logs.forEach(l=>{html+=logRow(l,day.key);});
     });
     html+=`</div></div>`;
 
@@ -614,7 +683,7 @@ function renderApp(){
           ${cryLabel(l)}</div>`;
       });
     });
-    html+=`</div></div><button class="expbtn" onclick="exportText()">Copier le rapport texte</button>`;
+    html+=`</div></div><div style="display:flex;gap:8px;margin-top:4px;"><button class="expbtn" style="flex:1" onclick="exportPDF()">Télécharger PDF</button><button class="expbtn" style="flex:1;border-color:var(--border);background:var(--bg3);color:var(--txt2)" onclick="exportText()">Copier texte</button></div>`;
   }
 
   document.getElementById('app').innerHTML=html;
@@ -622,7 +691,7 @@ function renderApp(){
   if(cTab==='progress')requestAnimationFrame(()=>{renderChart();});
 }
 
-function exportText(){
+function buildReportData(){
   const dur=getDur();
   const allLogsFlat=allDays().flatMap(d=>d.logs);
   const zoneTotals={};ZONES.forEach(z=>zoneTotals[z.id]=0);
@@ -632,6 +701,11 @@ function exportText(){
   const zeroDays=allDays().slice(0,Math.max(elapsed,1)).filter(d=>d.logs.length===0).length;
   const totalCry=allLogsFlat.filter(l=>l.cry===true).length;
   const endDate=getDay(dur-1).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  return{dur,allLogsFlat,zoneTotals,streak,elapsed,zeroDays,totalCry,endDate};
+}
+
+function exportText(){
+  const{dur,allLogsFlat,zoneTotals,streak,zeroDays,totalCry,endDate}=buildReportData();
   let txt=`SUIVI URINAIRE — CHAT\nPériode : 25/03/2026 → ${endDate} (${dur} jours)\n\n--- RÉSUMÉ ---\n`;
   txt+=`Total accidents : ${allLogsFlat.length}\nDont marquages : ${allLogsFlat.filter(l=>l.type==='marquage').length}\nDont avec pleurs : ${totalCry}\nJours sans accident : ${zeroDays}/${dur}\nMeilleure série sans accident : ${streak.best} jour(s)\n\n`;
   txt+='--- TOTAL PAR ENDROIT ---\n';
@@ -647,6 +721,94 @@ function exportText(){
   });
   navigator.clipboard.writeText(txt).then(()=>alert('Rapport copié !')).catch(()=>alert(txt));
 }
+
+function exportPDF(){
+  const{dur,allLogsFlat,zoneTotals,streak,zeroDays,totalCry,endDate}=buildReportData();
+
+  // Build print HTML
+  let rows='';
+  allDays().forEach((day,i)=>{
+    const isFuture=i>daysElapsed();
+    const dayData=loadDay(day.key);
+    const cnt=day.logs.length;
+    rows+=`<tr class="day-header"><td colspan="4"><strong>J${i+1} — ${day.label}</strong></td><td style="text-align:right">${isFuture?'—':cnt===0?(dayData.noAccident?'<span style="color:#1D9E75">Journée propre</span>':'<span style="color:#1D9E75">Aucun accident</span>'):`<span style="color:#c0392b">${cnt} accident(s)</span>`}</td></tr>`;
+    if(!isFuture){
+      if(!cnt){
+        rows+=`<tr><td colspan="5" style="padding-left:16px;color:#888;font-style:italic">${dayData.noAccident?'Journée propre confirmée':'Aucun accident enregistré'}</td></tr>`;
+      } else {
+        day.logs.forEach(l=>{
+          const z=ZONES.find(z=>z.id===l.zone);
+          const cry=l.cry===true?'Oui':l.cry===false?'Non':'—';
+          const dot=l.type==='marquage'?'🟠':'🔵';
+          rows+=`<tr><td style="padding-left:16px">${dot}</td><td>${timeDisplay(l)}</td><td>${z?z.label:l.zone}</td><td>${l.type==='marquage'?'Marquage':'Pipi normal'}</td><td>${cry}</td></tr>`;
+        });
+      }
+    }
+  });
+
+  const zoneRows=ZONES.map(z=>`<tr><td>${z.label}</td><td><strong>${zoneTotals[z.id]}</strong></td></tr>`).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Suivi Simba</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:11px;color:#222;margin:20px;}
+    h1{font-size:16px;margin-bottom:2px;}
+    .sub{color:#888;font-size:10px;margin-bottom:16px;}
+    h2{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin:16px 0 6px;border-bottom:1px solid #eee;padding-bottom:3px;}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+    td{padding:3px 6px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+    .day-header td{background:#f7f7f7;font-size:10px;padding:5px 6px;border-bottom:1px solid #e0e0e0;}
+    .stats td:first-child{color:#666;}
+    .stats td:last-child{font-weight:bold;text-align:right;}
+    @media print{body{margin:10px;}}
+  </style></head><body>
+  <h1>Suivi urinaire — Simba</h1>
+  <div class="sub">Période : 25/03/2026 → ${endDate} (${dur} jours) — Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+
+  <h2>Résumé</h2>
+  <table class="stats">
+    <tr><td>Total accidents</td><td>${allLogsFlat.length}</td></tr>
+    <tr><td>Dont marquages</td><td>${allLogsFlat.filter(l=>l.type==='marquage').length}</td></tr>
+    <tr><td>Dont avec pleurs</td><td>${totalCry}</td></tr>
+    <tr><td>Jours sans accident</td><td>${zeroDays}/${dur}</td></tr>
+    <tr><td>Meilleure série sans accident</td><td>${streak.best} jour(s)</td></tr>
+  </table>
+
+  <h2>Total par endroit</h2>
+  <table class="stats">${zoneRows}</table>
+
+  <h2>Journal détaillé</h2>
+  <table>
+    <tr style="background:#eee;font-weight:bold"><td></td><td>Heure</td><td>Endroit</td><td>Type</td><td>A pleuré</td></tr>
+    ${rows}
+  </table>
+  </body></html>`;
+
+  const w=window.open('','_blank','width=800,height=900');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{w.print();},400);
+}
+
+function exportText(){
+  const{dur,allLogsFlat,zoneTotals,streak,zeroDays,totalCry,endDate}=buildReportData();
+  let txt=`SUIVI URINAIRE — CHAT\nPériode : 25/03/2026 → ${endDate} (${dur} jours)\n\n--- RÉSUMÉ ---\n`;
+  txt+=`Total accidents : ${allLogsFlat.length}\nDont marquages : ${allLogsFlat.filter(l=>l.type==='marquage').length}\nDont avec pleurs : ${totalCry}\nJours sans accident : ${zeroDays}/${dur}\nMeilleure série sans accident : ${streak.best} jour(s)\n\n`;
+  txt+='--- TOTAL PAR ENDROIT ---\n';
+  ZONES.forEach(z=>{txt+=`${z.label} : ${zoneTotals[z.id]}\n`;});
+  txt+='\n--- JOURNAL DÉTAILLÉ ---\n';
+  allDays().forEach((day,i)=>{
+    const isFuture=i>daysElapsed();
+    const dayData=loadDay(day.key);
+    txt+=`J${i+1} — ${day.label} : `;
+    if(isFuture)txt+='—\n';
+    else if(!day.logs.length)txt+=(dayData.noAccident?'Journée propre confirmée':'Aucun accident')+'\n';
+    else{txt+='\n';day.logs.forEach(l=>{const z=ZONES.find(z=>z.id===l.zone);const cry=l.cry===true?' (a pleuré)':l.cry===false?' (sans pleurs)':'';txt+=`  ${timeDisplay(l)} — ${z?z.label:l.zone} — ${l.type}${cry}\n`;});}
+  });
+  navigator.clipboard.writeText(txt).then(()=>alert('Rapport copié !')).catch(()=>alert(txt));
+}
+
 
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{renderApp();});
 renderApp();

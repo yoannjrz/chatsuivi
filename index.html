@@ -672,14 +672,67 @@ window.firebaseDB = { db, ref, set, get, onValue };
 </script>
 
 <script type="module">
-const { db, ref, set } = window.firebaseDB;
+const { db, ref, set, onValue } = window.firebaseDB;
 
-await set(ref(db, "test"), {
-message: "TEST NOUVEAU 0105",
-heureLocale: new Date().toLocaleString('fr-FR'),
-heureISO: new Date().toISOString(),
-random: Math.floor(Math.random()*1000000)
+const APP_PATH = "sharedState";
+
+function collectState() {
+const out = {};
+for (let i = 0; i < localStorage.length; i++) {
+const key = localStorage.key(i);
+if (key === 'suivi_duration' || (key && key.startsWith('catlog5_'))) {
+out[key] = localStorage.getItem(key);
+}
+}
+return out;
+}
+
+function applyState(data) {
+if (!data) return;
+Object.entries(data).forEach(([key, value]) => {
+localStorage.setItem(key, value);
 });
+if (typeof renderApp === 'function') renderApp();
+}
+
+window.pushStateToFirebase = async function () {
+await set(ref(db, APP_PATH), collectState());
+};
+
+onValue(ref(db, APP_PATH), (snapshot) => {
+const data = snapshot.val();
+if (data) applyState(data);
+});
+
+const origSaveDay = saveDay;
+saveDay = function(d, data) {
+origSaveDay(d, data);
+window.pushStateToFirebase();
+};
+
+const origSetDuration = setDuration;
+setDuration = function(d) {
+origSetDuration(d);
+window.pushStateToFirebase();
+};
+
+const origToggleMed = toggleMed;
+toggleMed = function() {
+origToggleMed();
+window.pushStateToFirebase();
+};
+
+const origMarkNoAccident = markNoAccident;
+markNoAccident = function() {
+origMarkNoAccident();
+window.pushStateToFirebase();
+};
+
+const origUndoClean = undoClean;
+undoClean = function() {
+origUndoClean();
+window.pushStateToFirebase();
+};
 </script>
   
 </body>

@@ -675,8 +675,10 @@ window.firebaseDB = { db, ref, set, get, onValue };
 const { db, ref, set } = window.firebaseDB;
 
 await set(ref(db, "test"), {
-message: "Bonjour Firebase",
-heure: new Date().toISOString()
+message: "TEST NOUVEAU 0105",
+heureLocale: new Date().toLocaleString('fr-FR'),
+heureISO: new Date().toISOString(),
+random: Math.floor(Math.random()*1000000)
 });
 </script>
   
